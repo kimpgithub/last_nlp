@@ -7,9 +7,16 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 import java.util.concurrent.TimeUnit
 
+//RetrofitAPI
 
 // 데이터 클래스 정의
-data class QuestionRequest(val question: String)
+data class QuestionRequest(
+    val question: String,
+    val userInfo: UserInfo? = null,
+    val age: Int?,
+    val gender: String?
+)
+
 data class AnswerResponse(val question: String,val answer: String)
 
 // Retrofit 인터페이스 정의
