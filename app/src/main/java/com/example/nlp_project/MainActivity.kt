@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,10 +57,15 @@ class MainActivity : ComponentActivity() {
                     var userInfoCollected by remember { mutableStateOf(false) }
 
                     Scaffold(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize(),
                         topBar = { AppHeader() }
                     ) { innerPadding ->
-                        Column(modifier = Modifier.padding(innerPadding)) {
+                        Column(
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .background(color = Color.White)
+                        ) {
                             if (userInfoCollected) {
                                 ChatPage(
                                     modifier = Modifier.fillMaxSize(),
