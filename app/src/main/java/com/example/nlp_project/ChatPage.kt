@@ -21,6 +21,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -39,24 +41,12 @@ import androidx.compose.ui.viewinterop.AndroidView
 
 @Composable
 fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel) {
-    val answer by viewModel.answer.observeAsState(StructuredAnswer(emptyList(), emptyList()))
-    val messages = remember { mutableStateListOf<Pair<String, Boolean>>() } // Pair(메시지, isUser)
-
-    // 첫 번째 환영 메시지를 추가
-    remember {
-        messages.add(Pair("반갑습니다, 어떤 출산/보육 정책이 궁금하신가요?", false))
-    }
-
-
-    // 사용자가 메시지를 입력했을 때 호출되는 함수
-    fun addMessage(message: String, isUser: Boolean) {
-        messages.add(Pair(message, isUser))
-    }
+    val messages = viewModel.messages.collectAsState()
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Set background color
+            .background(MaterialTheme.colorScheme.background)
             .padding(8.dp)
     ) {
         LazyColumn(
@@ -65,49 +55,47 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel) {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(messages) { (text, isUser) ->
-                if (isUser) {
-                    // 사용자 질문을 오른쪽에 정렬
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Text(
-                            text = text,
-                            color = Color.White,
-                            modifier = Modifier
-                                .background(MaterialTheme.colorScheme.primary)
-                                .padding(12.dp)
-                                .align(Alignment.CenterVertically)
-                        )
-                    }
-                } else {
-                    // 답변을 왼쪽에 정렬
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        StructuredContentView(answer = answer, modifier = Modifier)
-                    }
+            items(messages.value) { message ->
+                when (message) {
+                    is ChatMessage.UserMessage -> UserMessageItem(message)
+                    is ChatMessage.BotMessage -> BotMessageItem(message)
                 }
             }
         }
 
         MessageInput(onMessageSend = { message ->
             if (message.isNotEmpty()) {
-                addMessage(message, true) // 질문을 추가
                 viewModel.sendMessage(message)
             }
         })
     }
+}
 
-    // Answer가 업데이트되었을 때만 답변 추가
-    if (answer.paragraphs.isNotEmpty() && messages.none { it.first == answer.paragraphs.joinToString { " " } && !it.second }) {
-        messages.add(Pair(answer.paragraphs.joinToString { " " }, false)) // 답변을 메시지 리스트에 추가
+@Composable
+fun UserMessageItem(message: ChatMessage.UserMessage) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End
+    ) {
+        Text(
+            text = message.content,
+            color = Color.White,
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(12.dp)
+        )
     }
 }
 
-
+@Composable
+fun BotMessageItem(message: ChatMessage.BotMessage) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start
+    ) {
+        StructuredContentView(answer = message.answer, modifier = Modifier)
+    }
+}
 data class StructuredAnswer(
     val paragraphs: List<String>,
     val links: List<String>
@@ -142,7 +130,6 @@ fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
             }
         }
     }
-
 }
 
 
