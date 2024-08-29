@@ -115,11 +115,12 @@ data class StructuredAnswer(
 
 @Composable
 fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp)
     ) {
-        items(answer.paragraphs) { paragraph ->
+        answer.paragraphs.forEach { paragraph ->
             Text(
                 text = paragraph,
                 fontSize = 16.sp,
@@ -128,15 +129,13 @@ fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
             )
         }
         if (answer.links.isNotEmpty()) {
-            item {
-                Text(
-                    text = "참고 링크:",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                )
-            }
-            items(answer.links) { link ->
+            Text(
+                text = "참고 링크:",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            answer.links.forEach { link ->
                 TextButton(onClick = { /* 링크 처리 로직 */ }) {
                     Text(text = link, color = androidx.compose.ui.graphics.Color.Blue)
                 }
