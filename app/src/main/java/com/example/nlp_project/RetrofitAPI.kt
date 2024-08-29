@@ -25,16 +25,16 @@ interface FlaskApiService {
     suspend fun getAnswer(@Body request: QuestionRequest): AnswerResponse
 }
 val okHttpClient = OkHttpClient.Builder()
-    .connectTimeout(30, TimeUnit.SECONDS) // 연결 타임아웃
-    .writeTimeout(30, TimeUnit.SECONDS) // 쓰기 타임아웃
-    .readTimeout(30, TimeUnit.SECONDS)  // 읽기 타임아웃
+    .connectTimeout(300, TimeUnit.SECONDS) // 연결 타임아웃
+    .writeTimeout(300, TimeUnit.SECONDS) // 쓰기 타임아웃
+    .readTimeout(300, TimeUnit.SECONDS)  // 읽기 타임아웃
     .build()
 
 // Retrofit 인스턴스 생성
 object RetrofitInstance {
     private val retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl("http://192.168.45.156:5000") // Flask 서버의 IP와 포트를 입력
+            .baseUrl("http://192.168.45.156:5001") // Flask 서버의 IP와 포트를 입력
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient) // OkHttpClient 설정 추가
             .build()
