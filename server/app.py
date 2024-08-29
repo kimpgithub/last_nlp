@@ -119,15 +119,31 @@ def home():
 
 @app.route('/ask', methods=['POST'])
 def ask():
-    data = request.get_json()  # JSON 데이터를 추출
-    question = data.get('question')  # 'question' 필드 추출
-    age = data.get('age')  # 'age' 필드 추출
-    gender = data.get('gender')  # 'gender' 필드 추출
+    data = request.get_json()
+    question = data.get('question')
+    age = data.get('age')
+    gender = data.get('gender')
 
     if question:
         answer = get_answer(question, age, gender)
-        return jsonify({"answer": answer})
-    
+        
+        # HTML 태그 제거
+        clean_answer = re.sub('<[^<]+?>', '', answer)
+        
+        # 링크 추출
+        links = re.findall(r'link: (https?://\S+)', clean_answer)
+        clean_answer = re.sub(r'link: https?://\S+', '', clean_answer).strip()
+        
+        # 단락 분리
+        paragraphs = [p.strip() for p in clean_answer.split('\n') if p.strip()]
+
+        return jsonify({
+            "answer": {
+                "paragraphs": paragraphs,
+                "links": links
+            }
+        })
+
     return jsonify({"error": "No question provided"}), 400
 
 # 간단한 HTML 템플릿
