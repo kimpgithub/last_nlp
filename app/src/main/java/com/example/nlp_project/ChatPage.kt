@@ -1,5 +1,7 @@
 package com.example.nlp_project
 
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import android.webkit.WebView
 import androidx.compose.foundation.background
@@ -32,7 +34,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -103,6 +112,7 @@ data class StructuredAnswer(
 
 @Composable
 fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -110,7 +120,7 @@ fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
     ) {
         answer.paragraphs.forEach { paragraph ->
             Text(
-                text = paragraph,
+                text = parseMarkdown(text = paragraph) ,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -124,14 +134,17 @@ fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
             answer.links.forEach { link ->
-                TextButton(onClick = { /* 링크 처리 로직 */ }) {
-                    Text(text = link, color = androidx.compose.ui.graphics.Color.Blue)
+                TextButton(onClick = {
+                    // Create an intent to open the URL
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                    context.startActivity(intent)
+                }) {
+                    Text(text = link, color = Color.Blue)
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun MessageInput(onMessageSend: (String) -> Unit) {
@@ -171,5 +184,88 @@ fun AppHeader() {
             color = Color.White,
             fontSize = 22.sp
         )
+    }
+}
+
+
+//마크다운 문법 적용
+@Composable
+fun parseMarkdown(text: String): AnnotatedString {
+    return buildAnnotatedString {
+        val header1Regex = "^# (.*)".toRegex()
+        val header2Regex = "^## (.*)".toRegex()
+        val header3Regex = "^### (.*)".toRegex()
+        val boldRegex = "\\*\\*(.*?)\\*\\*".toRegex()
+        val italicRegex = "\\*(.*?)\\*".toRegex()
+        val strikethroughRegex = "~~(.*?)~~".toRegex()
+        val linkRegex = "\\[(.*?)\\]\\((.*?)\\)".toRegex()
+        val lines = text.lines()
+
+        lines.forEach { line ->
+            when {
+                header1Regex.containsMatchIn(line) -> {
+                    val match = header1Regex.find(line)
+                    match?.let {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold, fontSize = 24.sp)) {
+                            append(it.groupValues[1] + "\n")
+                        }
+                    }
+                }
+                header2Regex.containsMatchIn(line) -> {
+                    val match = header2Regex.find(line)
+                    match?.let {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold, fontSize = 20.sp)) {
+                            append(it.groupValues[1] + "\n")
+                        }
+                    }
+                }
+                header3Regex.containsMatchIn(line) -> {
+                    val match = header3Regex.find(line)
+                    match?.let {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp)) {
+                            append(it.groupValues[1] + "\n")
+                        }
+                    }
+                }
+                boldRegex.containsMatchIn(line) -> {
+                    val match = boldRegex.find(line)
+                    match?.let {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append(it.groupValues[1])
+                        }
+                    }
+                }
+                italicRegex.containsMatchIn(line) -> {
+                    val match = italicRegex.find(line)
+                    match?.let {
+                        withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                            append(it.groupValues[1])
+                        }
+                    }
+                }
+                strikethroughRegex.containsMatchIn(line) -> {
+                    val match = strikethroughRegex.find(line)
+                    match?.let {
+                        withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough)) {
+                            append(it.groupValues[1])
+                        }
+                    }
+                }
+                linkRegex.containsMatchIn(line) -> {
+                    val match = linkRegex.find(line)
+                    match?.let {
+                        val (linkText, linkUrl) = it.destructured
+                        pushStringAnnotation(tag = "URL", annotation = linkUrl)
+                        withStyle(SpanStyle(color = androidx.compose.ui.graphics.Color.Blue, textDecoration = TextDecoration.LineThrough)) {
+                            append(linkText)
+                        }
+                        pop()
+                    }
+                }
+                else -> {
+                    append(line + "\n")
+                }
+            }
+        }
     }
 }
