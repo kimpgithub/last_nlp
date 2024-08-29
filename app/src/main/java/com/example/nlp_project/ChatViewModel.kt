@@ -9,8 +9,8 @@ import kotlinx.coroutines.launch
 //ChatViewModel
 
 class ChatViewModel : ViewModel() {
-    private val _answer = MutableLiveData<String>()
-    val answer: LiveData<String> get() = _answer
+    private val _answer = MutableLiveData<StructuredAnswer>()
+    val answer: LiveData<StructuredAnswer> get() = _answer
 
     private var userAge: Int? = null
     private var userGender: String? = null
@@ -30,10 +30,26 @@ class ChatViewModel : ViewModel() {
                         gender = userGender
                     )
                 )
-                _answer.value = response.answer
+                // 응답을 StructuredAnswer 형식으로 변환
+                val structuredAnswer = StructuredAnswer(
+                    paragraphs = response.answer.split("\n\n"), // 단락 기준으로 분리
+                    links = extractLinks(response.answer) // 링크를 추출하는 함수를 정의
+                )
+                _answer.value = structuredAnswer
             } catch (e: Exception) {
-                _answer.value = "Error: ${e.message}"
+                _answer.value = StructuredAnswer(
+                    paragraphs = listOf("Error: ${e.message}"),
+                    links = emptyList()
+                )
             }
         }
     }
+
+    // 단락에서 링크를 추출하는 함수 (예시)
+    private fun extractLinks(text: String): List<String> {
+        // 정규식을 사용하여 텍스트에서 URL을 추출
+        val urlRegex = "(https?://[\\w-]+(\\.[\\w-]+)+[/#?]?.*)".toRegex()
+        return urlRegex.findAll(text).map { it.value }.toList()
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.example.nlp_project
 
+import android.util.Log
 import android.webkit.WebView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -28,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -36,7 +39,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 
 @Composable
 fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel) {
-    val answer by viewModel.answer.observeAsState("")
+    val answer by viewModel.answer.observeAsState(StructuredAnswer(emptyList(), emptyList()))
     val messages = remember { mutableStateListOf<Pair<String, Boolean>>() } // Pair(메시지, isUser)
 
     // 첫 번째 환영 메시지를 추가
@@ -84,13 +87,7 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start
                     ) {
-                        HtmlContentView(
-                            htmlContent = text,
-                            modifier = Modifier
-                                .background(Color.LightGray)
-                                .padding(12.dp)
-                                .align(Alignment.CenterVertically)
-                        )
+                        StructuredContentView(answer = answer, modifier = Modifier)
                     }
                 }
             }
@@ -105,25 +102,50 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel) {
     }
 
     // Answer가 업데이트되었을 때만 답변 추가
-    if (answer.isNotEmpty() && messages.none { it.first == answer && !it.second }) {
-        messages.add(Pair(answer, false)) // 답변을 메시지 리스트에 추가
+    if (answer.paragraphs.isNotEmpty() && messages.none { it.first == answer.paragraphs.joinToString { " " } && !it.second }) {
+        messages.add(Pair(answer.paragraphs.joinToString { " " }, false)) // 답변을 메시지 리스트에 추가
     }
 }
+
+
+data class StructuredAnswer(
+    val paragraphs: List<String>,
+    val links: List<String>
+)
+
 @Composable
-fun HtmlContentView(htmlContent: String, modifier: Modifier = Modifier) {
-    AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
+fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        items(answer.paragraphs) { paragraph ->
+            Text(
+                text = paragraph,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+        if (answer.links.isNotEmpty()) {
+            item {
+                Text(
+                    text = "참고 링크:",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                )
             }
-        },
-        update = { webView ->
-            webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
-        },
-        modifier = modifier
-    )
+            items(answer.links) { link ->
+                TextButton(onClick = { /* 링크 처리 로직 */ }) {
+                    Text(text = link, color = androidx.compose.ui.graphics.Color.Blue)
+                }
+            }
+        }
+    }
+
 }
+
 
 @Composable
 fun MessageInput(onMessageSend: (String) -> Unit) {
