@@ -63,13 +63,13 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         modifier = Modifier
                             .fillMaxSize(),
-                        topBar = {
-                            AppHeader(onBackPressed = {
-                                handleBackPress(userInfoCollected) { newValue ->
-                                    userInfoCollected = newValue
-                                }
-                            })
-                        }
+//                        topBar = {
+//                            AppHeader(onBackPressed = {
+//                                handleBackPress(userInfoCollected) { newValue ->
+//                                    userInfoCollected = newValue
+//                                }
+//                            })
+//                        }
                     ) { innerPadding ->
                         Column(
                             modifier = Modifier

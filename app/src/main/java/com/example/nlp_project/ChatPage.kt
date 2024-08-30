@@ -1,5 +1,7 @@
 package com.example.nlp_project
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -55,6 +57,7 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel, onBackPres
     val messages = viewModel.messages.collectAsState()
     Log.d("ChatPage", "Rendering ChatPage with messages: ${messages.value.size}")
     var userInfoCollected by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
         modifier = modifier
@@ -62,7 +65,15 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel, onBackPres
             .background(MaterialTheme.colorScheme.background)
             .padding(8.dp)
     ) {
-        Topbar(text = "채팅 정책 서비스", onBackPressed = { null })
+        Topbar(text = "채팅 정책 서비스", onBackPressed = {
+            if (userInfoCollected) {
+                userInfoCollected = false
+            } else {
+                if (context is Activity) {
+                    context.finish()
+                }
+            }
+        })
 
         LazyColumn(
             modifier = Modifier
@@ -250,7 +261,8 @@ fun parseMarkdown(text: String): AnnotatedString {
         val italicRegex = "\\*(.*?)\\*".toRegex()
         val strikethroughRegex = "~~(.*?)~~".toRegex()
         val linkRegex = "\\[(.*?)\\]\\((.*?)\\)".toRegex()
-        val colonSeparatedRegex = "-\\s\\*\\*(.*?)\\*\\*:\\s*(.*)".toRegex() // ':' 뒤 내용을 포함하는 패턴
+        val colonSeparatedRegex =
+            "-\\s\\*\\*(.*?)\\*\\*:\\s*(.*)".toRegex() // ':' 뒤 내용을 포함하는 패턴
         val lines = text.lines()
 
         lines.forEachIndexed { index, line ->

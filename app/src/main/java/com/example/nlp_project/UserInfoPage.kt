@@ -17,6 +17,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,7 +58,7 @@ fun UserInfoPage(
     var salary by remember { mutableStateOf("") } // 연봉을 위한 상태 변수
     var gender by remember { mutableStateOf("남자") } // Default to "남자"
 
-    Topbar(text = "인적사항", onBackPressed = { null } )
+    Topbar(text = "인적사항", onBackPressed = { null })
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -65,9 +67,11 @@ fun UserInfoPage(
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        Text("※ 채팅 정책 도우미를 위해 기본 사항을 입력해주세요.",
+        Text(
+            "※ 채팅 정책 도우미를 위해 기본 사항을 입력해주세요.",
             color = Color.Black,
-            fontSize = 12.sp)
+            fontSize = 12.sp
+        )
 
         CustomOutLinedTextField(age, "나이") { age = it }
         CustomOutLinedTextField(region, "지역") { region = it }
@@ -157,11 +161,14 @@ private fun CustomOutLinedTextField(value: String, str: String, changeVal: (Stri
 }
 
 @Composable
-fun Topbar (text: String, onBackPressed: () -> Unit) {
-
-    Row (Modifier.fillMaxWidth().padding(16.dp),
+fun Topbar(text: String, onBackPressed: () -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically){
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Image(
             painter = painterResource(id = R.drawable.startactivityimage1),
             contentDescription = "LOGO",
@@ -170,19 +177,23 @@ fun Topbar (text: String, onBackPressed: () -> Unit) {
                 .align(Alignment.CenterVertically)
                 .padding(8.dp)
         )
-        Text(text = text,
+        Text(
+            text = text,
             fontSize = 20.sp,
             modifier = Modifier.padding(8.dp)
         )
-        IconButton(onClick = { onBackPressed() }) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White
-            )
+
+        Spacer(modifier = Modifier.weight(3f))
+
+        if (text != "인적사항") {
+            IconButton(onClick = { onBackPressed() }) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Back",
+                    tint = Color(0xFFFF788E)
+                )
+            }
         }
     }
-
-
-    HorizontalDivider(modifier = Modifier.padding(16.dp,0.dp))
+    HorizontalDivider(modifier = Modifier.padding(16.dp, 0.dp))
 }
