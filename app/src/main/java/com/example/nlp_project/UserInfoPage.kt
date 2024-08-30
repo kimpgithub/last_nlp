@@ -15,10 +15,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
@@ -52,7 +56,7 @@ fun UserInfoPage(
     var salary by remember { mutableStateOf("") } // 연봉을 위한 상태 변수
     var gender by remember { mutableStateOf("남자") } // Default to "남자"
 
-    Topbar(text = "인적사항" )
+    Topbar(text = "인적사항", onBackPressed = { null } )
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -153,7 +157,7 @@ private fun CustomOutLinedTextField(value: String, str: String, changeVal: (Stri
 }
 
 @Composable
-fun Topbar (text: String) {
+fun Topbar (text: String, onBackPressed: () -> Unit) {
 
     Row (Modifier.fillMaxWidth().padding(16.dp),
         horizontalArrangement = Arrangement.Start,
@@ -170,6 +174,15 @@ fun Topbar (text: String) {
             fontSize = 20.sp,
             modifier = Modifier.padding(8.dp)
         )
+        IconButton(onClick = { onBackPressed() }) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.White
+            )
+        }
     }
+
+
     HorizontalDivider(modifier = Modifier.padding(16.dp,0.dp))
 }

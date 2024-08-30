@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun handleBackPress(userInfoCollected: Boolean, setUserInfoCollected: (Boolean) -> Unit) {
+   private fun handleBackPress(userInfoCollected: Boolean, setUserInfoCollected: (Boolean) -> Unit) {
         if (userInfoCollected) {
             // userInfoCollected를 false로 설정하여 UserInfoPage로 이동
             setUserInfoCollected(false)

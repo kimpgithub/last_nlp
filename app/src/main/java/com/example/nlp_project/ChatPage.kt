@@ -47,8 +47,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.ClickableText
-import android.net.Uri
-import android.util.Log
 
 //ChatPage
 
@@ -56,6 +54,7 @@ import android.util.Log
 fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel, onBackPressed: () -> Unit) {
     val messages = viewModel.messages.collectAsState()
     Log.d("ChatPage", "Rendering ChatPage with messages: ${messages.value.size}")
+    var userInfoCollected by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -63,6 +62,8 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel, onBackPres
             .background(MaterialTheme.colorScheme.background)
             .padding(8.dp)
     ) {
+        Topbar(text = "채팅 정책 서비스", onBackPressed = { null })
+
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -76,9 +77,16 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel, onBackPres
                         Log.d("ChatPage", "UserMessage: ${message.content}")
                         ChatBubble(message = message.content, isUser = true)
                     }
+
                     is ChatMessage.BotMessage -> {
-                        Log.d("ChatPage", "BotMessage: ${message.answer.paragraphs.joinToString("\n")}")
-                        ChatBubble(message = parseMarkdown(message.answer.paragraphs.joinToString("\n")), isUser = false)
+                        Log.d(
+                            "ChatPage",
+                            "BotMessage: ${message.answer.paragraphs.joinToString("\n")}"
+                        )
+                        ChatBubble(
+                            message = parseMarkdown(message.answer.paragraphs.joinToString("\n")),
+                            isUser = false
+                        )
                     }
                 }
             }
@@ -145,7 +153,7 @@ fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
     ) {
         answer.paragraphs.forEach { paragraph ->
             Text(
-                text = parseMarkdown(text = paragraph) ,
+                text = parseMarkdown(text = paragraph),
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -221,6 +229,7 @@ fun AppHeader(onBackPressed: () -> Unit) {
                     tint = Color.White
                 )
             }
+
             Text(
                 text = "육아정챗",
                 color = Color.White,
@@ -254,6 +263,7 @@ fun parseMarkdown(text: String): AnnotatedString {
                         }
                     }
                 }
+
                 header2Regex.containsMatchIn(line) -> {
                     val match = header2Regex.find(line)
                     match?.let {
@@ -262,6 +272,7 @@ fun parseMarkdown(text: String): AnnotatedString {
                         }
                     }
                 }
+
                 header3Regex.containsMatchIn(line) -> {
                     val match = header3Regex.find(line)
                     match?.let {
@@ -270,6 +281,7 @@ fun parseMarkdown(text: String): AnnotatedString {
                         }
                     }
                 }
+
                 colonSeparatedRegex.containsMatchIn(line) -> {
                     val match = colonSeparatedRegex.find(line)
                     match?.let {
@@ -279,6 +291,7 @@ fun parseMarkdown(text: String): AnnotatedString {
                         append(it.groupValues[2])
                     }
                 }
+
                 boldRegex.containsMatchIn(line) -> {
                     val matches = boldRegex.findAll(line)
                     var lastEnd = 0
@@ -291,6 +304,7 @@ fun parseMarkdown(text: String): AnnotatedString {
                     }
                     append(line.substring(lastEnd))
                 }
+
                 italicRegex.containsMatchIn(line) -> {
                     val matches = italicRegex.findAll(line)
                     var lastEnd = 0
@@ -303,6 +317,7 @@ fun parseMarkdown(text: String): AnnotatedString {
                     }
                     append(line.substring(lastEnd))
                 }
+
                 strikethroughRegex.containsMatchIn(line) -> {
                     val matches = strikethroughRegex.findAll(line)
                     var lastEnd = 0
@@ -315,6 +330,7 @@ fun parseMarkdown(text: String): AnnotatedString {
                     }
                     append(line.substring(lastEnd))
                 }
+
                 linkRegex.containsMatchIn(line) -> {
                     val matches = linkRegex.findAll(line)
                     var lastEnd = 0
@@ -322,7 +338,12 @@ fun parseMarkdown(text: String): AnnotatedString {
                         append(line.substring(lastEnd, match.range.first))
                         val (linkText, linkUrl) = match.destructured
                         pushStringAnnotation(tag = "URL", annotation = linkUrl)
-                        withStyle(SpanStyle(color = Color.Blue, textDecoration = TextDecoration.Underline)) {
+                        withStyle(
+                            SpanStyle(
+                                color = Color.Blue,
+                                textDecoration = TextDecoration.Underline
+                            )
+                        ) {
                             append(linkText)
                         }
                         pop()
@@ -330,6 +351,7 @@ fun parseMarkdown(text: String): AnnotatedString {
                     }
                     append(line.substring(lastEnd))
                 }
+
                 else -> {
                     append(line)
                 }
