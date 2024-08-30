@@ -1,13 +1,16 @@
 package com.example.nlp_project
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
@@ -29,8 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +52,7 @@ fun UserInfoPage(
     var salary by remember { mutableStateOf("") } // 연봉을 위한 상태 변수
     var gender by remember { mutableStateOf("남자") } // Default to "남자"
 
+    Topbar(text = "인적사항" )
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -52,7 +61,9 @@ fun UserInfoPage(
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        Text("※ 채팅 정책 도우미를 위해 기본 사항을 입력해주세요.", color = Color.Black)
+        Text("※ 채팅 정책 도우미를 위해 기본 사항을 입력해주세요.",
+            color = Color.Black,
+            fontSize = 12.sp)
 
         CustomOutLinedTextField(age, "나이") { age = it }
         CustomOutLinedTextField(region, "지역") { region = it }
@@ -139,4 +150,26 @@ private fun CustomOutLinedTextField(value: String, str: String, changeVal: (Stri
             unfocusedContainerColor = Color.White,
         )
     )
+}
+
+@Composable
+fun Topbar (text: String) {
+
+    Row (Modifier.fillMaxWidth().padding(16.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically){
+        Image(
+            painter = painterResource(id = R.drawable.startactivityimage1),
+            contentDescription = "LOGO",
+            modifier = Modifier
+                .size(40.dp)
+                .align(Alignment.CenterVertically)
+                .padding(8.dp)
+        )
+        Text(text = text,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(8.dp)
+        )
+    }
+    HorizontalDivider(modifier = Modifier.padding(16.dp,0.dp))
 }

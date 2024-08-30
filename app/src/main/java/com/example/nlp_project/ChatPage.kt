@@ -1,6 +1,9 @@
 package com.example.nlp_project
 
 import android.content.Intent
+import android.net.Uri
+import android.util.Log
+import android.webkit.WebView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,9 +23,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -54,6 +61,7 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel, onBackPres
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .padding(8.dp)
     ) {
         LazyColumn(
             modifier = Modifier
@@ -126,6 +134,42 @@ data class StructuredAnswer(
     val paragraphs: List<String>,
     val links: List<String>
 )
+
+@Composable
+fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
+    val context = LocalContext.current
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        answer.paragraphs.forEach { paragraph ->
+            Text(
+                text = parseMarkdown(text = paragraph) ,
+                fontSize = 16.sp,
+                lineHeight = 24.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+        if (answer.links.isNotEmpty()) {
+            Text(
+                text = "참고 링크:",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            answer.links.forEach { link ->
+                TextButton(onClick = {
+                    // Create an intent to open the URL
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+                    context.startActivity(intent)
+                }) {
+                    Text(text = link, color = Color.Blue)
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun MessageInput(onMessageSend: (String) -> Unit) {
