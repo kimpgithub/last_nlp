@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
@@ -101,40 +103,47 @@ class MainActivity : ComponentActivity() {
                 Text(
                     text = "곧 태어날 아이와 가족을 위한 \n" +
                             "특별한 혜택을 물어보세요",
-                    fontSize = 20.sp,
+                    fontSize = 16.sp,
                     color = Color(0xffff788E),
                     textAlign = TextAlign.Center
                 )
                 Image(
                     painter = painterResource(id = R.drawable.startactivityimage1),
                     contentDescription = "LOGO",
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .align(Alignment.CenterVertically)
                 )
             }
+
             Spacer(modifier = Modifier.weight(2f))
-            Row(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Spacer(modifier = Modifier.width(160.dp))
+            Box (modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd) {
                 Image(
                     painter = painterResource(id = R.drawable.startactivityimage5),
                     contentDescription = "TALKBALLON",
                     modifier = Modifier
-                        .size(400.dp)
+                        .size(280.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(.5f))
             Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
                 Image(
-                    painter = painterResource(id = R.drawable.startactivityimage4),
-                    contentDescription = "CHUNG"
+                    painter = painterResource(id = R.drawable.birthpolichat_logo),
+                    contentDescription = "CHUNG",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .align(Alignment.CenterVertically)
                 )
                 Text(
                     text = "육아정챗",
-                    fontSize = 24.sp
+                    fontSize = 24.sp,
+                    modifier = Modifier.padding(8.dp)
                 )
             }
+            Spacer(modifier = Modifier.weight(.5f))
         }
     }
 }
+
