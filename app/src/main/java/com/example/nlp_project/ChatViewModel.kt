@@ -1,7 +1,5 @@
 package com.example.nlp_project
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,11 +15,9 @@ class ChatViewModel : ViewModel() {
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
 
     private var userAge: Int? = null
-    private var userGender: String? = null
 
     fun saveUserInfo(age: Int, gender: String) {
         userAge = age
-        userGender = gender
     }
 
     fun sendMessage(question: String) {
@@ -31,15 +27,26 @@ class ChatViewModel : ViewModel() {
                 val response = RetrofitInstance.api.getAnswer(
                     QuestionRequest(
                         question = question,
-                        age = userAge,
-                        gender = userGender
+                        age = userAge
                     )
                 )
-                val structuredAnswer = StructuredAnswer(
-                    paragraphs = response.answer.split("\n\n"),
-                    links = extractLinks(response.answer)
-                )
-                _messages.value += ChatMessage.BotMessage(structuredAnswer)
+
+                if (response.isSuccessful) {
+                    response.body()?.let { structuredResponse ->
+                        val structuredAnswer = StructuredAnswer(
+                            paragraphs = structuredResponse.answer.split("\n\n"),
+                            links = extractLinks(structuredResponse.answer)
+                        )
+                        _messages.value += ChatMessage.BotMessage(structuredAnswer)
+                    }
+                } else {
+                    _messages.value += ChatMessage.BotMessage(
+                        StructuredAnswer(
+                            paragraphs = listOf("Error: ${response.message()}"),
+                            links = emptyList()
+                        )
+                    )
+                }
             } catch (e: Exception) {
                 _messages.value += ChatMessage.BotMessage(
                     StructuredAnswer(
@@ -61,3 +68,8 @@ sealed class ChatMessage {
     data class UserMessage(val content: String) : ChatMessage()
     data class BotMessage(val answer: StructuredAnswer) : ChatMessage()
 }
+
+data class StructuredAnswer(
+    val paragraphs: List<String>,
+    val links: List<String>
+)

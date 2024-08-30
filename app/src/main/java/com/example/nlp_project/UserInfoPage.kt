@@ -3,6 +3,7 @@ package com.example.nlp_project
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,17 +46,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserInfoPage(
     viewModel: UserInfoViewModel,
-    onNext: () -> Unit,
+    navController: NavController,  // Add this parameter
     chatViewModel: ChatViewModel
 ) {
     var age by remember { mutableStateOf("") }
-    var region by remember { mutableStateOf("") } // 지역을 위한 상태 변수
-    var salary by remember { mutableStateOf("") } // 연봉을 위한 상태 변수
+    var region by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("남자") } // Default to "남자"
 
     Topbar(text = "인적사항", onBackPressed = { null })
@@ -75,30 +75,32 @@ fun UserInfoPage(
 
         CustomOutLinedTextField(age, "나이") { age = it }
         CustomOutLinedTextField(region, "지역") { region = it }
-        CustomOutLinedTextField(salary, "연봉") { salary = it }
 
+        // Gender Selection
         Row(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(vertical = 14.dp)
                 .border(
-                    BorderStroke(2.dp, Color(0xFFFF788E)), // 테두리 두께와 색상 설정
-                    shape = RoundedCornerShape(16.dp)     // 모서리 둥글기 설정 (Radius 16px)
+                    BorderStroke(2.dp, Color(0xFFFF788E)),
+                    shape = RoundedCornerShape(16.dp)
                 )
-                .clip(RoundedCornerShape(16.dp)),        // 테두리에 맞게 필드를 자름,
+                .clip(RoundedCornerShape(16.dp)),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text("성별", color = Color.Black, modifier = Modifier.padding(16.dp))
             GenderRadioButton(gender) { gender = it }
         }
+
         Spacer(modifier = Modifier.weight(2f))
         Button(
             onClick = {
-                if (age.isNotEmpty() && region.isNotEmpty() && salary.isNotEmpty()) {
+                if (age.isNotEmpty() && region.isNotEmpty()) {
                     chatViewModel.saveUserInfo(
                         age.toInt(),
-                        gender
-                    )  // Save user info in ChatViewModel
-                    onNext()
+                        gender // Pass the selected gender
+                    )
+                    navController.navigate("chat_screen")  // Navigate to the chat screen
                 }
             },
             modifier = Modifier
@@ -107,30 +109,44 @@ fun UserInfoPage(
         ) {
             Text("채팅 시작하기", color = Color.White)
         }
-        Spacer(modifier = Modifier.weight(2f))
     }
 }
 
 @Composable
-private fun GenderRadioButton(gender: String, changeGender: (String) -> Unit) {
+fun GenderRadioButton(selectedGender: String, onGenderSelected: (String) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(
-            selected = gender == "남자",
-            onClick = { changeGender("남자") },
-            colors = RadioButtonDefaults.colors(Color(0xFFFF788E))
+        RadioButtonWithText(
+            text = "남자",
+            isSelected = selectedGender == "남자",
+            onClick = { onGenderSelected("남자") }
         )
-        Text(text = "남자", color = Color.Black, modifier = Modifier.padding(start = 8.dp))
+        RadioButtonWithText(
+            text = "여자",
+            isSelected = selectedGender == "여자",
+            onClick = { onGenderSelected("여자") }
+        )
+    }
+}
 
-        RadioButton(
-            selected = gender == "여자",
-            onClick = { changeGender("여자") },
-            colors = RadioButtonDefaults.colors(Color(0xFFFF788E)),
-            modifier = Modifier.padding(start = 16.dp)
+@Composable
+fun RadioButtonWithText(text: String, isSelected: Boolean, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable { onClick() }
+    ) {
+        androidx.compose.material3.RadioButton(
+            selected = isSelected,
+            onClick = null, // Make the whole row clickable instead of just the button
+            colors = androidx.compose.material3.RadioButtonDefaults.colors(
+                selectedColor = Color(0xFFFF788E)
+            )
         )
-        Text(text = "여자", color = Color.Black, modifier = Modifier.padding(start = 8.dp))
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(text = text, color = Color.Black)
     }
 }
 
@@ -148,7 +164,7 @@ private fun CustomOutLinedTextField(value: String, str: String, changeVal: (Stri
                 shape = RoundedCornerShape(16.dp)     // 모서리 둥글기 설정 (Radius 16px)
             )
             .clip(RoundedCornerShape(16.dp)),
-        keyboardOptions = if (str == "나이" || str == "연봉") {
+        keyboardOptions = if (str == "나이") {
             KeyboardOptions(keyboardType = KeyboardType.Number) // 숫자 키보드
         } else {
             KeyboardOptions.Default

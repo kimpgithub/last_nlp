@@ -1,42 +1,44 @@
 package com.example.nlp_project
 
 import okhttp3.OkHttpClient
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
 import java.util.concurrent.TimeUnit
 
-//RetrofitAPI
+// Retrofit API and Data Classes
 
-// 데이터 클래스 정의
 data class QuestionRequest(
     val question: String,
     val userInfo: UserInfo? = null,
-    val age: Int?,
-    val gender: String?
+    val age: Int?
 )
 
-data class AnswerResponse(val question: String,val answer: String)
+data class StructuredAnswerResponse(
+    val answer: String // The response from the API containing the answer text
+)
 
-// Retrofit 인터페이스 정의
 interface FlaskApiService {
-    @POST("/ask")
-    suspend fun getAnswer(@Body request: QuestionRequest): AnswerResponse
+    @POST("ask")
+    suspend fun getAnswer(
+        @Body request: QuestionRequest
+    ): Response<StructuredAnswerResponse> // Wrap the response in Response<>
 }
+
 val okHttpClient = OkHttpClient.Builder()
-    .connectTimeout(300, TimeUnit.SECONDS) // 연결 타임아웃
-    .writeTimeout(300, TimeUnit.SECONDS) // 쓰기 타임아웃
-    .readTimeout(300, TimeUnit.SECONDS)  // 읽기 타임아웃
+    .connectTimeout(300, TimeUnit.SECONDS)
+    .writeTimeout(300, TimeUnit.SECONDS)
+    .readTimeout(300, TimeUnit.SECONDS)
     .build()
 
-// Retrofit 인스턴스 생성
 object RetrofitInstance {
     private val retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl("http://192.168.45.156:5000/") // Flask 서버의 IP와 포트를 입력
+            .baseUrl("http://192.168.45.156:5000/") // Flask server base URL
             .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient) // OkHttpClient 설정 추가
+            .client(okHttpClient)
             .build()
     }
 

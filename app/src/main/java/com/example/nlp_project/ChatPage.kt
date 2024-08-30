@@ -1,11 +1,9 @@
 package com.example.nlp_project
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import android.webkit.WebView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
@@ -30,8 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -48,15 +45,16 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.text.ClickableText
-
-//ChatPage
+import androidx.navigation.NavController
 
 @Composable
-fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel, onBackPressed: () -> Unit) {
+fun ChatPage(
+    modifier: Modifier = Modifier,
+    viewModel: ChatViewModel,
+    navController: NavController, // Add NavController as a parameter
+    onBackPressed: () -> Unit = { navController.popBackStack() } // Default to navController's popBackStack
+) {
     val messages = viewModel.messages.collectAsState()
-    Log.d("ChatPage", "Rendering ChatPage with messages: ${messages.value.size}")
-    var userInfoCollected by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     Column(
@@ -65,15 +63,7 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel, onBackPres
             .background(MaterialTheme.colorScheme.background)
             .padding(8.dp)
     ) {
-        Topbar(text = "채팅 정책 서비스", onBackPressed = {
-            if (userInfoCollected) {
-                userInfoCollected = false
-            } else {
-                if (context is Activity) {
-                    context.finish()
-                }
-            }
-        })
+        AppHeader(onBackPressed = onBackPressed)
 
         LazyColumn(
             modifier = Modifier
@@ -85,15 +75,9 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel, onBackPres
             items(messages.value) { message ->
                 when (message) {
                     is ChatMessage.UserMessage -> {
-                        Log.d("ChatPage", "UserMessage: ${message.content}")
                         ChatBubble(message = message.content, isUser = true)
                     }
-
                     is ChatMessage.BotMessage -> {
-                        Log.d(
-                            "ChatPage",
-                            "BotMessage: ${message.answer.paragraphs.joinToString("\n")}"
-                        )
                         ChatBubble(
                             message = parseMarkdown(message.answer.paragraphs.joinToString("\n")),
                             isUser = false
@@ -105,7 +89,6 @@ fun ChatPage(modifier: Modifier = Modifier, viewModel: ChatViewModel, onBackPres
 
         MessageInput(onMessageSend = { message ->
             if (message.isNotEmpty()) {
-                Log.d("ChatPage", "Message sent: $message")
                 viewModel.sendMessage(message)
             }
         })
@@ -148,11 +131,6 @@ fun ChatBubble(message: AnnotatedString, isUser: Boolean) {
 fun ChatBubble(message: String, isUser: Boolean) {
     ChatBubble(message = AnnotatedString(message), isUser = isUser)
 }
-
-data class StructuredAnswer(
-    val paragraphs: List<String>,
-    val links: List<String>
-)
 
 @Composable
 fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
