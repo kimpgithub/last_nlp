@@ -44,6 +44,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             NLP_ProjectTheme {
                 var isStartActivity by remember { mutableStateOf(true) }
+                var userInfoCollected by remember { mutableStateOf(false) }
+
                 //시작화면은 3초 유지 or 클릭하면 넘어가게
                 if (isStartActivity) {
                     StartScreen { isStartActivity = false }
@@ -59,7 +61,13 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         modifier = Modifier
                             .fillMaxSize(),
-                        topBar = { AppHeader() }
+                        topBar = {
+                            AppHeader(onBackPressed = {
+                                handleBackPress(userInfoCollected) { newValue ->
+                                    userInfoCollected = newValue
+                                }
+                            })
+                        }
                     ) { innerPadding ->
                         Column(
                             modifier = Modifier
@@ -69,7 +77,12 @@ class MainActivity : ComponentActivity() {
                             if (userInfoCollected) {
                                 ChatPage(
                                     modifier = Modifier.fillMaxSize(),
-                                    viewModel = chatViewModel
+                                    viewModel = chatViewModel,
+                                    onBackPressed = {
+                                        handleBackPress(userInfoCollected) { newValue ->
+                                            userInfoCollected = newValue
+                                        }
+                                    }
                                 )
                             } else {
                                 UserInfoPage(
@@ -84,6 +97,16 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun handleBackPress(userInfoCollected: Boolean, setUserInfoCollected: (Boolean) -> Unit) {
+        if (userInfoCollected) {
+            // userInfoCollected를 false로 설정하여 UserInfoPage로 이동
+            setUserInfoCollected(false)
+        } else {
+            // 기본 동작 수행하여 액티비티 종료
+            finish()
         }
     }
 
