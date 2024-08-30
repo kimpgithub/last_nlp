@@ -76,7 +76,6 @@ class MainActivity : ComponentActivity() {
                                     viewModel = userInfoViewModel,
                                     onNext = {
                                         userInfoCollected = true
-                                        chatViewModel.sendMessage("User information collected.")
                                     },
                                     chatViewModel = chatViewModel  // Pass chatViewModel here
                                 )

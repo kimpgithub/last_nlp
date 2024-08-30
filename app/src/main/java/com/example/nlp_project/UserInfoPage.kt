@@ -40,7 +40,9 @@ fun UserInfoPage(
     chatViewModel: ChatViewModel
 ) {
     var age by remember { mutableStateOf("") }
-    var gender by remember { mutableStateOf("Male") } // Default to "Male"
+    var region by remember { mutableStateOf("") } // 지역을 위한 상태 변수
+    var salary by remember { mutableStateOf("") } // 연봉을 위한 상태 변수
+    var gender by remember { mutableStateOf("남자") } // Default to "남자"
 
     Column(
         modifier = Modifier
@@ -51,9 +53,10 @@ fun UserInfoPage(
     ) {
         Spacer(modifier = Modifier.weight(1f))
         Text("※ 채팅 정책 도우미를 위해 기본 사항을 입력해주세요.", color = Color.Black)
+
         CustomOutLinedTextField(age, "나이") { age = it }
-        CustomOutLinedTextField(age, "지역") { age = it }
-        CustomOutLinedTextField(age, "연봉") { age = it }
+        CustomOutLinedTextField(region, "지역") { region = it }
+        CustomOutLinedTextField(salary, "연봉") { salary = it }
 
         Row(
             modifier = Modifier
@@ -71,7 +74,7 @@ fun UserInfoPage(
         Spacer(modifier = Modifier.weight(2f))
         Button(
             onClick = {
-                if (age.isNotEmpty()) {
+                if (age.isNotEmpty() && region.isNotEmpty() && salary.isNotEmpty()) {
                     chatViewModel.saveUserInfo(
                         age.toInt(),
                         gender
@@ -113,10 +116,10 @@ private fun GenderRadioButton(gender: String, changeGender: (String) -> Unit) {
 }
 
 @Composable
-private fun CustomOutLinedTextField(age: String, str: String, changeVal: (String) -> Unit) {
+private fun CustomOutLinedTextField(value: String, str: String, changeVal: (String) -> Unit) {
     TextField(
-        value = age,
-        onValueChange = { changeVal(age) },
+        value = value,
+        onValueChange = { changeVal(it) },
         label = { Text(str, color = Color.Black) },
         modifier = Modifier
             .fillMaxWidth()
@@ -125,8 +128,12 @@ private fun CustomOutLinedTextField(age: String, str: String, changeVal: (String
                 BorderStroke(2.dp, Color(0xFFFF788E)), // 테두리 두께와 색상 설정
                 shape = RoundedCornerShape(16.dp)     // 모서리 둥글기 설정 (Radius 16px)
             )
-            .clip(RoundedCornerShape(16.dp)),        // 테두리에 맞게 필드를 자름,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            .clip(RoundedCornerShape(16.dp)),
+        keyboardOptions = if (str == "나이" || str == "연봉") {
+            KeyboardOptions(keyboardType = KeyboardType.Number) // 숫자 키보드
+        } else {
+            KeyboardOptions.Default
+        },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,

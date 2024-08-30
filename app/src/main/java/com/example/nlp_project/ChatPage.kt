@@ -180,7 +180,7 @@ fun AppHeader() {
             .background(MaterialTheme.colorScheme.primary)
     ) {
         Text(
-            modifier = Modifier.padding(16.dp), text = "출산 정책 Chat Bot",
+            modifier = Modifier.padding(16.dp), text = "육아정챗",
             color = Color.White,
             fontSize = 22.sp
         )
