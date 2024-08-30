@@ -2,7 +2,9 @@ package com.example.nlp_project
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,17 +21,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,6 +83,7 @@ fun UserInfoPage(
 
         CustomOutLinedTextField(age, "나이") { age = it }
         CustomOutLinedTextField(region, "지역") { region = it }
+        SearchableRegionDropdownMenu(regions = regions)
         CustomOutLinedTextField(salary, "연봉") { salary = it }
 
         Row(
@@ -160,6 +169,7 @@ private fun CustomOutLinedTextField(value: String, str: String, changeVal: (Stri
     )
 }
 
+
 @Composable
 fun Topbar(text: String, onBackPressed: () -> Unit) {
     Row(
@@ -196,4 +206,70 @@ fun Topbar(text: String, onBackPressed: () -> Unit) {
         }
     }
     HorizontalDivider(modifier = Modifier.padding(16.dp, 0.dp))
+}
+
+@Composable
+fun SearchableRegionDropdownMenu(regions: List<Region>) {
+    var expanded by remember { mutableStateOf(false) }
+    var selectedRegion by remember { mutableStateOf<Region?>(null) }
+    var searchText by remember { mutableStateOf("") }
+
+    // Function to filter regions based on the search text
+    fun filterRegions(region: Region): List<Region> {
+        val isMatching = region.name.contains(searchText, ignoreCase = true)
+        val matchingSubregions =
+            region.subregions.filter { it.name.contains(searchText, ignoreCase = true) }
+        return if (isMatching || matchingSubregions.isNotEmpty()) {
+            listOf(region.copy(subregions = matchingSubregions))
+        } else {
+            emptyList()
+        }
+    }
+
+    // Flatten the filtered regions and their subregions
+    val filteredRegions = regions.flatMap { region ->
+        filterRegions(region).flatMap { filteredRegion ->
+            listOf(filteredRegion) + filteredRegion.subregions
+        }
+    }
+
+    Column {
+        Button(modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 18.dp)
+            .border(
+                BorderStroke(2.dp, Color(0xFFFF788E)), // 테두리 두께와 색상 설정
+                shape = RoundedCornerShape(16.dp)     // 모서리 둥글기 설정 (Radius 16px)
+            )
+            .clip(RoundedCornerShape(16.dp)),
+            colors = ButtonDefaults.buttonColors(Color.White)
+            ,onClick = { expanded = true }) {
+            Text(text = selectedRegion?.name ?: "지역", color = Color.DarkGray)
+        }
+
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            TextField(
+                value = searchText,
+                onValueChange = { newText -> searchText = newText },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                placeholder = { Text("Search...") }
+            )
+
+            filteredRegions.forEach { region ->
+                DropdownMenuItem(
+                    onClick = {
+                        selectedRegion = region
+                        expanded = false
+                    },
+                    text = { Text(text = region.name) }
+                )
+            }
+        }
+
+        selectedRegion?.let { region ->
+            Text(text = "${region.name}")
+        }
+    }
 }
