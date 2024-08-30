@@ -34,7 +34,7 @@ val okHttpClient = OkHttpClient.Builder()
 object RetrofitInstance {
     private val retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl("http://192.168.45.156:5000/") // Flask 서버의 IP와 포트를 입력
+            .baseUrl("http://172.30.1.69:5001/") // Flask 서버의 IP와 포트를 입력
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient) // OkHttpClient 설정 추가
             .build()

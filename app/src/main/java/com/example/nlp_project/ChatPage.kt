@@ -124,7 +124,7 @@ fun ChatBubble(message: AnnotatedString, isUser: Boolean) {
         Box(
             modifier = Modifier
                 .background(
-                    color = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                    color = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceBright,
                     shape = RoundedCornerShape(12.dp)
                 )
                 .padding(12.dp)
@@ -153,42 +153,6 @@ data class StructuredAnswer(
     val paragraphs: List<String>,
     val links: List<String>
 )
-
-@Composable
-fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
-    val context = LocalContext.current
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        answer.paragraphs.forEach { paragraph ->
-            Text(
-                text = parseMarkdown(text = paragraph),
-                fontSize = 16.sp,
-                lineHeight = 24.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
-        if (answer.links.isNotEmpty()) {
-            Text(
-                text = "참고 링크:",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-            )
-            answer.links.forEach { link ->
-                TextButton(onClick = {
-                    // Create an intent to open the URL
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                    context.startActivity(intent)
-                }) {
-                    Text(text = link, color = Color.Blue)
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun MessageInput(onMessageSend: (String) -> Unit) {
