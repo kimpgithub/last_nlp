@@ -36,7 +36,7 @@ val okHttpClient = OkHttpClient.Builder()
 object RetrofitInstance {
     private val retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl("http://192.168.45.156:5000/") // Flask server base URL
+            .baseUrl("http://192.168.45.44:5000/") // Flask server base URL
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()

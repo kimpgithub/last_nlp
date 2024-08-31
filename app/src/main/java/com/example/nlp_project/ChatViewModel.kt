@@ -66,7 +66,10 @@ class ChatViewModel : ViewModel() {
 
 sealed class ChatMessage {
     data class UserMessage(val content: String) : ChatMessage()
-    data class BotMessage(val answer: StructuredAnswer) : ChatMessage()
+    data class BotMessage(
+        val answer: StructuredAnswer,
+        val fromServer: Boolean = false // 서버에서 온 응답인지 확인하는 플래그 추가
+    ) : ChatMessage()
 }
 
 data class StructuredAnswer(

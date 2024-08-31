@@ -1,10 +1,10 @@
 package com.example.nlp_project
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +26,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,8 +50,8 @@ import androidx.navigation.NavController
 fun ChatPage(
     modifier: Modifier = Modifier,
     viewModel: ChatViewModel,
-    navController: NavController, // Add NavController as a parameter
-    onBackPressed: () -> Unit = { navController.popBackStack() } // Default to navController's popBackStack
+    navController: NavController,
+    onBackPressed: () -> Unit = { navController.popBackStack() }
 ) {
     val messages = viewModel.messages.collectAsState()
     val context = LocalContext.current
@@ -64,6 +63,30 @@ fun ChatPage(
             .padding(8.dp)
     ) {
         AppHeader(onBackPressed = onBackPressed)
+
+        // Adding cards at the top of the chat page
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            InfoCard(title = "정책 안내", description = "출산/보육 정책을 안내합니다.", onClick = {
+                // Handle card click event
+                viewModel.sendMessage("정책 안내")
+            }, modifier = Modifier.weight(1f))
+
+            InfoCard(title = "신청 방법", description = "지원 신청 방법을 알아보세요.", onClick = {
+                // Handle card click event
+                viewModel.sendMessage("신청 방법")
+            }, modifier = Modifier.weight(1f))
+
+            InfoCard(title = "지원 대상", description = "지원 대상 여부를 확인하세요.", onClick = {
+                // Handle card click event
+                viewModel.sendMessage("지원 대상")
+            }, modifier = Modifier.weight(1f))
+        }
 
         LazyColumn(
             modifier = Modifier
@@ -77,11 +100,21 @@ fun ChatPage(
                     is ChatMessage.UserMessage -> {
                         ChatBubble(message = message.content, isUser = true)
                     }
+
                     is ChatMessage.BotMessage -> {
                         ChatBubble(
                             message = parseMarkdown(message.answer.paragraphs.joinToString("\n")),
                             isUser = false
                         )
+
+                        // SmallCardRow를 서버 응답일 때만 추가
+                        if (message.fromServer) {
+                            SmallCardRow(
+                                onCardClick1 = { /* Handle first card click */ },
+                                onCardClick2 = { /* Handle second card click */ },
+                                onCardClick3 = { /* Handle third card click */ }
+                            )
+                        }
                     }
                 }
             }
@@ -92,6 +125,79 @@ fun ChatPage(
                 viewModel.sendMessage(message)
             }
         })
+    }
+}
+
+@Composable
+fun SmallCardRow(
+    onCardClick1: () -> Unit,
+    onCardClick2: () -> Unit,
+    onCardClick3: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        SmallCard(title = "옵션 1", onClick = onCardClick1, modifier = Modifier.weight(1f))
+        SmallCard(title = "옵션 2", onClick = onCardClick2, modifier = Modifier.weight(1f))
+        SmallCard(title = "옵션 3", onClick = onCardClick3, modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+fun SmallCard(
+    title: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
+            .fillMaxWidth() // `fillMaxWidth`를 사용하여 Box가 최대 너비를 차지하게 합니다.
+            .padding(8.dp)
+            .clickable(onClick = onClick)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            ),
+            modifier = Modifier.align(Alignment.Center)
+        )
+    }
+}
+
+@Composable
+fun InfoCard(
+    title: String,
+    description: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
+            .padding(16.dp)
+            .clickable(onClick = onClick)
+    ) {
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = Color.White
+                )
+            )
+        }
     }
 }
 
@@ -353,3 +459,4 @@ fun parseMarkdown(text: String): AnnotatedString {
         }
     }
 }
+
