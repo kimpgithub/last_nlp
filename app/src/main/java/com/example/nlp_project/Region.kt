@@ -1,5 +1,41 @@
 package com.example.nlp_project
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.InputChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
 data class Region(val name: String, val subregions: List<Region> = emptyList())
 
 val regions = listOf(
@@ -15,9 +51,6 @@ val regions = listOf(
             Region("화천군"),
             Region("횡성군")
         )
-    ),
-    Region(
-        "강원특별자치도교육청"
     ),
     Region(
         "경기도",
@@ -70,10 +103,6 @@ val regions = listOf(
             Region("청송군"),
             Region("포항시")
         )
-    ),
-    Region(
-        "공공기관",
-        listOf() // No subregions
     ),
     Region(
         "광주광역시",
@@ -176,10 +205,7 @@ val regions = listOf(
         "제주특별자치도",
         listOf() // No subregions
     ),
-    Region(
-        "중앙부처",
-        listOf() // No subregions
-    ),
+
     Region(
         "충청남도",
         listOf(
@@ -213,3 +239,143 @@ val regions = listOf(
         )
     )
 )
+
+@Composable
+fun RegionSelectionScreen() {
+    var selectedRegions by remember { mutableStateOf(setOf<String>()) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "선호 지역",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        RegionGrid(
+            regions = listOf(
+                "서울", "경기", "인천", "부산",
+                "경남", "경북", "대구", "울산",
+                "대전", "충남", "충북", "광주",
+                "전남", "전북", "강원", "제주",
+                "세종"
+            ),
+            selectedRegions = selectedRegions,
+            onRegionSelected = { region ->
+                selectedRegions = if (region in selectedRegions) {
+                    selectedRegions - region
+                } else {
+                    selectedRegions + region
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        SelectedRegionsSection(
+            selectedRegions = selectedRegions,
+            onRemoveRegion = { region ->
+                selectedRegions = selectedRegions - region
+            },
+            onClearAll = {
+                selectedRegions = emptySet()
+            }
+        )
+
+        Button(
+            onClick = { /* Apply selection */ },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5E5CFF))
+        ) {
+            Text("적용", color = Color.White)
+        }
+    }
+}
+
+@Composable
+fun RegionGrid(
+    regions: List<String>,
+    selectedRegions: Set<String>,
+    onRegionSelected: (String) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(4),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(regions) { region ->
+            RegionChip(
+                region = region,
+                isSelected = region in selectedRegions,
+                onSelected = { onRegionSelected(region) }
+            )
+        }
+    }
+}
+
+@Composable
+fun RegionChip(
+    region: String,
+    isSelected: Boolean,
+    onSelected: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.small,
+        color = if (isSelected) Color(0xFF5E5CFF) else Color.LightGray,
+        onClick = onSelected
+    ) {
+        Text(
+            text = region,
+            color = if (isSelected) Color.White else Color.Black,
+            modifier = Modifier.padding(8.dp),
+            fontSize = 14.sp
+        )
+    }
+}
+
+@Composable
+fun SelectedRegionsSection(
+    selectedRegions: Set<String>,
+    onRemoveRegion: (String) -> Unit,
+    onClearAll: () -> Unit
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("선택한 지역", fontWeight = FontWeight.Bold)
+            TextButton(onClick = onClearAll) {
+                Text("전체삭제", color = Color.Gray)
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        selectedRegions.forEach { region ->
+            AssistChip(
+                onClick = { onRemoveRegion(region) },
+                label = { Text(region) },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Remove"
+                    )
+                },
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview(){
+    RegionSelectionScreen()
+}
