@@ -16,8 +16,15 @@ data class QuestionRequest(
     val age: Int?
 )
 
+data class AnswerObject(
+    val paragraphs: List<String> = emptyList(),  // 기본값으로 빈 리스트 설정
+    val links: List<String> = emptyList(),  // 기본값으로 빈 리스트 설정
+    val policies: List<String> = emptyList() // 기본값으로 빈 리스트 설정
+)
+
 data class StructuredAnswerResponse(
-    val answer: String // The response from the API containing the answer text
+    val answer: AnswerObject,  // JSON 객체로 받음
+    val fromServer: Boolean
 )
 
 interface FlaskApiService {

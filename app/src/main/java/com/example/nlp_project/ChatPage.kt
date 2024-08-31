@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +45,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun ChatPage(
@@ -55,6 +60,8 @@ fun ChatPage(
 ) {
     val messages = viewModel.messages.collectAsState()
     val context = LocalContext.current
+    val listState = rememberLazyListState()
+    var scrollToMessage by remember { mutableStateOf(false) } // Control scroll action
 
     Column(
         modifier = modifier
@@ -64,56 +71,69 @@ fun ChatPage(
     ) {
         AppHeader(onBackPressed = onBackPressed)
 
-        // Adding cards at the top of the chat page
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            InfoCard(title = "정책 안내", description = "출산/보육 정책을 안내합니다.", onClick = {
-                // Handle card click event
-                viewModel.sendMessage("정책 안내")
-            }, modifier = Modifier.weight(1f))
-
-            InfoCard(title = "신청 방법", description = "지원 신청 방법을 알아보세요.", onClick = {
-                // Handle card click event
-                viewModel.sendMessage("신청 방법")
-            }, modifier = Modifier.weight(1f))
-
-            InfoCard(title = "지원 대상", description = "지원 대상 여부를 확인하세요.", onClick = {
-                // Handle card click event
-                viewModel.sendMessage("지원 대상")
-            }, modifier = Modifier.weight(1f))
+        LaunchedEffect(messages.value.size, scrollToMessage) {
+            if (scrollToMessage) {
+                listState.animateScrollToItem(messages.value.size)
+                scrollToMessage = false
+            }
         }
 
         LazyColumn(
+            state = listState, // Pass the listState to control scrolling
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Adding cards at the top of the chat page
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    InfoCard(title = "정책 안내", description = "출산/보육 정책을 안내합니다.", onClick = {
+                        viewModel.sendMessage("정책 안내")
+                    }, modifier = Modifier.weight(1f))
+
+                    InfoCard(title = "신청 방법", description = "지원 신청 방법을 알아보세요.", onClick = {
+                        viewModel.sendMessage("신청 방법")
+                    }, modifier = Modifier.weight(1f))
+
+                    InfoCard(title = "지원 대상", description = "지원 대상 여부를 확인하세요.", onClick = {
+                        viewModel.sendMessage("지원 대상")
+                    }, modifier = Modifier.weight(1f))
+                }
+            }
             items(messages.value) { message ->
                 when (message) {
                     is ChatMessage.UserMessage -> {
+                        Log.d("ChatPage", "UserMessage: ${message.content}")
                         ChatBubble(message = message.content, isUser = true)
                     }
 
                     is ChatMessage.BotMessage -> {
+                        Log.d("ChatPage", "BotMessage received from server: ${message.fromServer}")
+                        Log.d("ChatPage", "Policies: ${message.answer.policies}")
+
                         ChatBubble(
                             message = parseMarkdown(message.answer.paragraphs.joinToString("\n")),
                             isUser = false
                         )
 
-                        // SmallCardRow를 서버 응답일 때만 추가
-                        if (message.fromServer) {
+                        // 서버 응답에 포함된 policies 리스트를 SmallCardRow에 전달
+                        if (message.fromServer && message.answer.policies.isNotEmpty()) {
+                            Log.d("ChatPage", "Displaying SmallCardRow")
                             SmallCardRow(
-                                onCardClick1 = { /* Handle first card click */ },
-                                onCardClick2 = { /* Handle second card click */ },
-                                onCardClick3 = { /* Handle third card click */ }
+                                policies = message.answer.policies,
+                                viewModel = viewModel,
+                                onCardClick = { scrollToMessage = true } // Trigger scroll on card click
                             )
+                        } else {
+                            Log.d("ChatPage", "No policies to display")
                         }
                     }
                 }
@@ -122,42 +142,58 @@ fun ChatPage(
 
         MessageInput(onMessageSend = { message ->
             if (message.isNotEmpty()) {
+                Log.d("ChatPage", "MessageInput: $message")
                 viewModel.sendMessage(message)
             }
         })
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SmallCardRow(
-    onCardClick1: () -> Unit,
-    onCardClick2: () -> Unit,
-    onCardClick3: () -> Unit
+    policies: List<String>,
+    viewModel: ChatViewModel,
+    onCardClick: () -> Unit // Callback to trigger scroll on card click
 ) {
-    Row(
+    Log.d("SmallCardRow", "Rendering SmallCardRow with policies: $policies")
+
+    FlowRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        SmallCard(title = "옵션 1", onClick = onCardClick1, modifier = Modifier.weight(1f))
-        SmallCard(title = "옵션 2", onClick = onCardClick2, modifier = Modifier.weight(1f))
-        SmallCard(title = "옵션 3", onClick = onCardClick3, modifier = Modifier.weight(1f))
+        policies.forEach { policy ->
+            SmallCard(
+                title = policy,
+                viewModel = viewModel,
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(8.dp),
+                onClick = {
+                    viewModel.sendMessage("'$policy'에 대해 자세히 알려줘") // Trigger message send
+                    onCardClick() // Trigger scroll when a card is clicked
+                }
+            )
+        }
     }
 }
+
 
 @Composable
 fun SmallCard(
     title: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    viewModel: ChatViewModel,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
-            .fillMaxWidth() // `fillMaxWidth`를 사용하여 Box가 최대 너비를 차지하게 합니다.
             .padding(8.dp)
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick) // 이곳에서 viewModel.sendMessage를 호출하지 않음
     ) {
         Text(
             text = title,
@@ -236,42 +272,6 @@ fun ChatBubble(message: AnnotatedString, isUser: Boolean) {
 @Composable
 fun ChatBubble(message: String, isUser: Boolean) {
     ChatBubble(message = AnnotatedString(message), isUser = isUser)
-}
-
-@Composable
-fun StructuredContentView(answer: StructuredAnswer, modifier: Modifier) {
-    val context = LocalContext.current
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        answer.paragraphs.forEach { paragraph ->
-            Text(
-                text = parseMarkdown(text = paragraph),
-                fontSize = 16.sp,
-                lineHeight = 24.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
-        if (answer.links.isNotEmpty()) {
-            Text(
-                text = "참고 링크:",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-            )
-            answer.links.forEach { link ->
-                TextButton(onClick = {
-                    // Create an intent to open the URL
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
-                    context.startActivity(intent)
-                }) {
-                    Text(text = link, color = Color.Blue)
-                }
-            }
-        }
-    }
 }
 
 @Composable

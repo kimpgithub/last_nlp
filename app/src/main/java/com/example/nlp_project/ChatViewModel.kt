@@ -1,5 +1,6 @@
 package com.example.nlp_project
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +24,7 @@ class ChatViewModel : ViewModel() {
     fun sendMessage(question: String) {
         viewModelScope.launch {
             _messages.value += ChatMessage.UserMessage(question)
+            Log.d("ChatViewModel", "User message sent: $question")
             try {
                 val response = RetrofitInstance.api.getAnswer(
                     QuestionRequest(
@@ -32,14 +34,25 @@ class ChatViewModel : ViewModel() {
                 )
 
                 if (response.isSuccessful) {
+                    Log.d("ChatViewModel", "Response received successfully")
                     response.body()?.let { structuredResponse ->
+                        Log.d("ChatViewModel", "Structured Response: $structuredResponse")
+
                         val structuredAnswer = StructuredAnswer(
-                            paragraphs = structuredResponse.answer.split("\n\n"),
-                            links = extractLinks(structuredResponse.answer)
+                            paragraphs = structuredResponse.answer.paragraphs ?: emptyList(),  // null이면 빈 리스트로 설정
+                            links = structuredResponse.answer.links ?: emptyList(),  // null이면 빈 리스트로 설정
+                            policies = structuredResponse.answer.policies  // 기본값이 이미 설정되어 있어 null 처리 불필요
                         )
-                        _messages.value += ChatMessage.BotMessage(structuredAnswer)
+
+                        Log.d("ChatViewModel", "Parsed StructuredAnswer: $structuredAnswer")
+
+                        _messages.value += ChatMessage.BotMessage(
+                            answer = structuredAnswer,
+                            fromServer = structuredResponse.fromServer // fromServer 플래그 설정
+                        )
                     }
                 } else {
+                    Log.e("ChatViewModel", "Error response: ${response.message()}")
                     _messages.value += ChatMessage.BotMessage(
                         StructuredAnswer(
                             paragraphs = listOf("Error: ${response.message()}"),
@@ -48,6 +61,7 @@ class ChatViewModel : ViewModel() {
                     )
                 }
             } catch (e: Exception) {
+                Log.e("ChatViewModel", "Exception occurred: ${e.message}")
                 _messages.value += ChatMessage.BotMessage(
                     StructuredAnswer(
                         paragraphs = listOf("Error: ${e.message}"),
@@ -74,5 +88,6 @@ sealed class ChatMessage {
 
 data class StructuredAnswer(
     val paragraphs: List<String>,
-    val links: List<String>
+    val links: List<String>,
+    val policies: List<String> = emptyList() // 기본값으로 빈 리스트를 설정
 )
