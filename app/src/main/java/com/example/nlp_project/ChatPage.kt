@@ -49,6 +49,11 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.LaunchedEffect
 
 @Composable
@@ -69,7 +74,7 @@ fun ChatPage(
             .background(MaterialTheme.colorScheme.background)
             .padding(8.dp)
     ) {
-        AppHeader(onBackPressed = onBackPressed)
+        Topbar(text = "정챗 도우미", onBackPressed = onBackPressed)
 
         LaunchedEffect(messages.value.size, scrollToMessage) {
             if (scrollToMessage) {
@@ -108,6 +113,7 @@ fun ChatPage(
                     }, modifier = Modifier.weight(1f))
                 }
             }
+
             items(messages.value) { message ->
                 when (message) {
                     is ChatMessage.UserMessage -> {
@@ -130,7 +136,9 @@ fun ChatPage(
                             SmallCardRow(
                                 policies = message.answer.policies,
                                 viewModel = viewModel,
-                                onCardClick = { scrollToMessage = true } // Trigger scroll on card click
+                                onCardClick = {
+                                    scrollToMessage = true
+                                } // Trigger scroll on card click
                             )
                         } else {
                             Log.d("ChatPage", "No policies to display")
@@ -213,11 +221,14 @@ fun InfoCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Card(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp))
-            .padding(16.dp)
-            .clickable(onClick = onClick)
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(8.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(Color(0xFFFF788E))
     ) {
         Column {
             Text(
@@ -225,13 +236,15 @@ fun InfoCard(
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Bold,
                     color = Color.White
-                )
+                ),
+                modifier = Modifier.padding(8.dp)
             )
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall.copy(
                     color = Color.White
-                )
+                ),
+                modifier = Modifier.padding(8.dp)
             )
         }
     }
@@ -274,6 +287,7 @@ fun ChatBubble(message: String, isUser: Boolean) {
     ChatBubble(message = AnnotatedString(message), isUser = isUser)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageInput(onMessageSend: (String) -> Unit) {
     var message by remember { mutableStateOf("") }
@@ -281,17 +295,24 @@ fun MessageInput(onMessageSend: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).padding(8.dp),
             value = message,
             onValueChange = {
                 Log.d("MessageInput", "Message input changed: $it")
                 message = it
             },
-            placeholder = { Text("궁금한 내용을 입력하세요") } // 단순히 placeholder를 설정
+            placeholder = { Text("궁금한 내용을 입력하세요") }, // 단순히 placeholder를 설정
+            shape = CircleShape,  // Circle 모양으로 변경
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = Color(0xFFFF788E),
+                unfocusedBorderColor = Color(0xFFFF788E)
+            )
         )
+
         IconButton(onClick = {
             if (message.isNotEmpty()) {
                 Log.d("MessageInput", "Sending message: $message")
@@ -299,7 +320,9 @@ fun MessageInput(onMessageSend: (String) -> Unit) {
                 message = ""
             }
         }) {
-            Icon(imageVector = Icons.Default.Send, contentDescription = "Send")
+            Icon(imageVector = Icons.Default.Send,
+                contentDescription = "Send",
+                tint = Color(0xFFFF788E))
         }
     }
 }

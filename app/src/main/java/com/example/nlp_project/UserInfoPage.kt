@@ -59,6 +59,7 @@ fun UserInfoPage(
     var gender by remember { mutableStateOf("남자") } // Default to "남자"
 
     Topbar(text = "인적사항", onBackPressed = { null })
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -177,39 +178,42 @@ private fun CustomOutLinedTextField(value: String, str: String, changeVal: (Stri
 }
 
 @Composable
-fun Topbar(text: String, onBackPressed: () -> Unit) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.startactivityimage1),
-            contentDescription = "LOGO",
-            modifier = Modifier
-                .size(40.dp)
-                .align(Alignment.CenterVertically)
-                .padding(8.dp)
-        )
-        Text(
-            text = text,
-            fontSize = 20.sp,
-            modifier = Modifier.padding(8.dp)
-        )
+fun Topbar(text: String, onBackPressed:() -> Unit) {
+    Column {
 
-        Spacer(modifier = Modifier.weight(3f))
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.startactivityimage1),
+                contentDescription = "LOGO",
+                modifier = Modifier
+                    .size(40.dp)
+                    .align(Alignment.CenterVertically)
+                    .padding(8.dp)
+            )
+            Text(
+                text = text,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(8.dp)
+            )
 
-        if (text != "인적사항") {
-            IconButton(onClick = { onBackPressed() }) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Back",
-                    tint = Color(0xFFFF788E)
-                )
+            Spacer(modifier = Modifier.weight(3f))
+
+            if (text != "인적사항") {
+                IconButton(onClick = { onBackPressed() }) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Back",
+                        tint = Color(0xFFFF788E)
+                    )
+                }
             }
         }
+        HorizontalDivider(modifier = Modifier.padding(16.dp, 0.dp))
     }
-    HorizontalDivider(modifier = Modifier.padding(16.dp, 0.dp))
 }
