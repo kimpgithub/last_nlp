@@ -19,7 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
@@ -90,10 +93,12 @@ class MainActivity : ComponentActivity() {
             }
 
             Spacer(modifier = Modifier.weight(2f))
-            Box(modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd) {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
                 Image(
-                    painter = painterResource(id = R.drawable.startactivityimage5),
+                    painter = painterResource(id = R.drawable.startscreen_women),
                     contentDescription = "TALKBALLON",
                     modifier = Modifier
                         .size(280.dp)
@@ -109,10 +114,21 @@ class MainActivity : ComponentActivity() {
                         .size(32.dp)
                         .align(Alignment.CenterVertically)
                 )
+                val birthpolichat = buildAnnotatedString {
+                    append("육아정")
+                    withStyle(
+                        style = SpanStyle(
+                            fontSize = 24.sp,
+                            color = Color(0xffff788E)
+                        )
+                    ) {
+                        append("챗")
+                    }
+                }
                 Text(
-                    text = "육아정챗",
+                    text = birthpolichat,
                     fontSize = 24.sp,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp),
                 )
             }
             Spacer(modifier = Modifier.weight(.5f))

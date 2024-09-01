@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -201,7 +202,7 @@ fun SmallCard(
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
-            .padding(8.dp)
+            .padding(12.dp)
             .clickable(onClick = onClick) // 이곳에서 viewModel.sendMessage를 호출하지 않음
     ) {
         Text(
@@ -267,7 +268,7 @@ fun ChatBubble(message: AnnotatedString, isUser: Boolean) {
                     shape = RoundedCornerShape(8.dp)
                 )
                 .border(
-                    width = 1.dp, // 두께를 설정
+                    width = 1.dp,
                     color = if (isUser) Color(0xFFFF788E) else Color.LightGray,
                     shape = RoundedCornerShape(8.dp)
                 )
@@ -305,7 +306,9 @@ fun MessageInput(onMessageSend: (String) -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
-            modifier = Modifier.weight(1f).padding(8.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(8.dp),
             value = message,
             onValueChange = {
                 Log.d("MessageInput", "Message input changed: $it")
