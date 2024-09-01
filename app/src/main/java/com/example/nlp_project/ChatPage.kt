@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -72,7 +73,7 @@ fun ChatPage(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(8.dp)
+            .padding(8.dp, 0.dp)
     ) {
         Topbar(text = "정챗 도우미", onBackPressed = onBackPressed)
 
@@ -262,14 +263,19 @@ fun ChatBubble(message: AnnotatedString, isUser: Boolean) {
         Box(
             modifier = Modifier
                 .background(
-                    color = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-                    shape = RoundedCornerShape(12.dp)
+                    color = if (isUser) Color.White else Color.White,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .border(
+                    width = 1.dp, // 두께를 설정
+                    color = if (isUser) Color(0xFFFF788E) else Color.LightGray,
+                    shape = RoundedCornerShape(8.dp)
                 )
                 .padding(12.dp)
         ) {
             ClickableText(
                 text = message,
-                style = MaterialTheme.typography.bodyLarge.copy(color = if (isUser) Color.White else Color.Black),
+                style = MaterialTheme.typography.bodyLarge.copy(color = if (isUser) Color.Black else Color.Black),
                 onClick = { offset ->
                     message.getStringAnnotations(tag = "URL", start = offset, end = offset)
                         .firstOrNull()?.let { annotation ->

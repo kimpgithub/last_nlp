@@ -2,6 +2,7 @@ package com.example.nlp_project
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -202,9 +203,8 @@ fun Topbar(text: String, onBackPressed:() -> Unit) {
                 modifier = Modifier.padding(8.dp)
             )
 
-            Spacer(modifier = Modifier.weight(3f))
-
             if (text != "인적사항") {
+                Spacer(modifier = Modifier.weight(3f))
                 IconButton(onClick = { onBackPressed() }) {
                     Icon(
                         imageVector = Icons.Default.Close,
