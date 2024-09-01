@@ -28,6 +28,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.nlp_project.ui.theme.NLP_ProjectTheme
+import com.example.nlp_project.uiview.userinfo.UserInfoPage
+import com.example.nlp_project.uiview.chat.ChatPage
+import com.example.viewmodel.ChatViewModel
+import com.example.viewmodel.UserInfoViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

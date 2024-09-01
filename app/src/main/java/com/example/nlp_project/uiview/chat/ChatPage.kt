@@ -1,4 +1,4 @@
-package com.example.nlp_project
+package com.example.nlp_project.uiview.chat
 
 import android.content.Intent
 import android.net.Uri
@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -55,6 +54,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.LaunchedEffect
+import com.example.nlp_project.uiview.userinfo.Topbar
+import com.example.viewmodel.ChatMessage
+import com.example.viewmodel.ChatViewModel
 
 @Composable
 fun ChatPage(

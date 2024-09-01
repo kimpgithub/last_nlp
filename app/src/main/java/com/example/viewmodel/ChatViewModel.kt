@@ -1,8 +1,10 @@
-package com.example.nlp_project
+package com.example.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.nlp_project.network.QuestionRequest
+import com.example.nlp_project.network.RetrofitInstance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,9 +12,11 @@ import kotlinx.coroutines.launch
 
 //ChatViewModel
 class ChatViewModel : ViewModel() {
-    private val _messages = MutableStateFlow<List<ChatMessage>>(listOf(ChatMessage.BotMessage(
-        StructuredAnswer(listOf("반갑습니다, 어떤 출산/보육 정책이 궁금하신가요?"), emptyList())
-    )))
+    private val _messages = MutableStateFlow<List<ChatMessage>>(listOf(
+        ChatMessage.BotMessage(
+            StructuredAnswer(listOf("반갑습니다, 어떤 출산/보육 정책이 궁금하신가요?"), emptyList())
+        )
+    ))
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
 
     private var userAge: Int? = null
