@@ -71,6 +71,9 @@ fun ChatPage(
     val listState = rememberLazyListState()
     var scrollToMessage by remember { mutableStateOf(false) } // Control scroll action
 
+    val userAge = viewModel.userAge
+    val userRegion = viewModel.userRegion
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -155,8 +158,13 @@ fun ChatPage(
 
         MessageInput(onMessageSend = { message ->
             if (message.isNotEmpty()) {
-                Log.d("ChatPage", "MessageInput: $message")
-                viewModel.sendMessage(message)
+                // Modify the message to include user info
+                val personalizedMessage = buildString {
+                    if (userAge != null) append("User age: $userAge, ")
+                    if (userRegion != null) append("User region: $userRegion, ")
+                    append(message)
+                }
+                viewModel.sendMessage(personalizedMessage)
             }
         })
     }
@@ -202,11 +210,22 @@ fun SmallCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
+    val userAge = viewModel.userAge
+    val userRegion = viewModel.userRegion
+
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
             .padding(8.dp)
-            .clickable(onClick = onClick) // 이곳에서 viewModel.sendMessage를 호출하지 않음
+            .clickable {
+                val personalizedMessage = buildString {
+                    if (userAge != null) append("User age: $userAge, ")
+                    if (userRegion != null) append("User region: $userRegion, ")
+                    append("'$title'에 대해 자세히 알려줘")
+                }
+                viewModel.sendMessage(personalizedMessage)
+                onClick()
+            }
     ) {
         Text(
             text = title,

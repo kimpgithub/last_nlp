@@ -19,10 +19,12 @@ class ChatViewModel : ViewModel() {
     ))
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()
 
-    private var userAge: Int? = null
+    public var userAge: Int? = null
+    public var userRegion: String? = null
 
-    fun saveUserInfo(age: Int, gender: String) {
+    fun saveUserInfo(age: Int, region: String) {
         userAge = age
+        userRegion = region
     }
 
     fun sendMessage(question: String) {
