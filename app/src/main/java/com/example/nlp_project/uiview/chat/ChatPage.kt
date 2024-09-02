@@ -4,7 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -57,6 +55,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.LaunchedEffect
+import com.example.nlp_project.uiview.userinfo.Topbar
+import com.example.viewmodel.ChatMessage
+import com.example.viewmodel.ChatViewModel
 
 @Composable
 fun ChatPage(
@@ -74,7 +75,7 @@ fun ChatPage(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(8.dp, 0.dp)
+            .padding(8.dp)
     ) {
         Topbar(text = "정챗 도우미", onBackPressed = onBackPressed)
 
@@ -202,7 +203,7 @@ fun SmallCard(
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
-            .padding(12.dp)
+            .padding(8.dp)
             .clickable(onClick = onClick) // 이곳에서 viewModel.sendMessage를 호출하지 않음
     ) {
         Text(
@@ -264,19 +265,14 @@ fun ChatBubble(message: AnnotatedString, isUser: Boolean) {
         Box(
             modifier = Modifier
                 .background(
-                    color = if (isUser) Color.White else Color.White,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .border(
-                    width = 1.dp,
-                    color = if (isUser) Color(0xFFFF788E) else Color.LightGray,
-                    shape = RoundedCornerShape(8.dp)
+                    color = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                    shape = RoundedCornerShape(12.dp)
                 )
                 .padding(12.dp)
         ) {
             ClickableText(
                 text = message,
-                style = MaterialTheme.typography.bodyLarge.copy(color = if (isUser) Color.Black else Color.Black),
+                style = MaterialTheme.typography.bodyLarge.copy(color = if (isUser) Color.White else Color.Black),
                 onClick = { offset ->
                     message.getStringAnnotations(tag = "URL", start = offset, end = offset)
                         .firstOrNull()?.let { annotation ->
@@ -306,9 +302,7 @@ fun MessageInput(onMessageSend: (String) -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
-            modifier = Modifier
-                .weight(1f)
-                .padding(8.dp),
+            modifier = Modifier.weight(1f).padding(8.dp),
             value = message,
             onValueChange = {
                 Log.d("MessageInput", "Message input changed: $it")

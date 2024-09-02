@@ -1,4 +1,4 @@
-package com.example.nlp_project
+package com.example.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

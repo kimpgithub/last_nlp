@@ -1,5 +1,6 @@
-package com.example.nlp_project
+package com.example.nlp_project.network
 
+import com.example.viewmodel.UserInfo
 import okhttp3.OkHttpClient
 import retrofit2.Response
 import retrofit2.Retrofit
