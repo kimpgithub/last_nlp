@@ -73,7 +73,8 @@ fun ChatPage(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+//            .background(MaterialTheme.colorScheme.background)
+            .background(Color.White)
             .padding(8.dp)
     ) {
         Topbar(text = "정챗 도우미", onBackPressed = onBackPressed)
@@ -98,7 +99,8 @@ fun ChatPage(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.background)
+//                      .background(MaterialTheme.colorScheme.background)
+                        .background(Color.White)
                         .padding(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -301,7 +303,9 @@ fun MessageInput(onMessageSend: (String) -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         OutlinedTextField(
-            modifier = Modifier.weight(1f).padding(8.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(8.dp),
             value = message,
             onValueChange = {
                 Log.d("MessageInput", "Message input changed: $it")
