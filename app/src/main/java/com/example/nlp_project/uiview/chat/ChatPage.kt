@@ -190,18 +190,22 @@ fun SmallCardRow(
             SmallCard(
                 title = policy,
                 viewModel = viewModel,
+                onClick = {
+                    val personalizedMessage = buildString {
+                        viewModel.userAge?.let { append("User age: $it, ") }
+                        viewModel.userRegion?.let { append("User region: $it, ") }
+                        append("'$policy'에 대해 자세히 알려줘")
+                    }
+                    viewModel.sendMessage(personalizedMessage)
+                    onCardClick() // Trigger scroll when a card is clicked
+                },
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(8.dp),
-                onClick = {
-                    viewModel.sendMessage("'$policy'에 대해 자세히 알려줘") // Trigger message send
-                    onCardClick() // Trigger scroll when a card is clicked
-                }
+                    .padding(8.dp)
             )
         }
     }
 }
-
 
 @Composable
 fun SmallCard(
@@ -210,22 +214,11 @@ fun SmallCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    val userAge = viewModel.userAge
-    val userRegion = viewModel.userRegion
-
     Box(
         modifier = modifier
             .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
             .padding(8.dp)
-            .clickable {
-                val personalizedMessage = buildString {
-                    if (userAge != null) append("User age: $userAge, ")
-                    if (userRegion != null) append("User region: $userRegion, ")
-                    append("'$title'에 대해 자세히 알려줘")
-                }
-                viewModel.sendMessage(personalizedMessage)
-                onClick()
-            }
+            .clickable(onClick = onClick) // Call only the onClick handler
     ) {
         Text(
             text = title,
